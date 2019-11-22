@@ -12,3 +12,5 @@ prod_server/migrations/__pycache__
 prod_server/migrations/versions/__pycache__
 prod_server/models/__pycache__
 venv/
+*.bak
+*.pyc
