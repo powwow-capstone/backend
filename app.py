@@ -13,7 +13,9 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 sys.path.append('models')
+sys.path.append('algorithm')
 from fields import *
+from field_cluster import *
 
 @app.route("/")
 def hello():
@@ -43,6 +45,7 @@ def hello():
 def get_all_field_data():
     try:
         allFields = Field.query.all()
+        alg(allFields)
         return jsonify([e.serialize() for e in allFields])
     except Exception as e:
         return (str(e))
