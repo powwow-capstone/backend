@@ -41,7 +41,7 @@ def hello():
 # def get_weather_by_id_form():
 #     return render_template("coolfrontpage.html", weathers=Weather.query.all())
 
-@app.route("/field")
+@app.route("/api/fields")
 def get_all_field_data():
     try:
         allFields = Field.query.all()
@@ -50,7 +50,7 @@ def get_all_field_data():
     except Exception as e:
         return (str(e))
 
-@app.route("/field/<id_>")
+@app.route("/api/fields/<id_>")
 def get_field_by_id(id_):
     try:
         field = Field.query.filter_by(id=id_).first()
