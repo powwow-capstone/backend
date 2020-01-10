@@ -1,5 +1,6 @@
-## Documentation and stuff...
+#Getting features(polygons) from ds2677.gdb that intersect with given raster files
 
+## Documentation and stuff...
 - Crop2014 census has some errors that only show up when specific processes are run
 - Thankfully stack exchange  exists
 - Error : Invalid geometry
@@ -48,7 +49,7 @@
 #Code stuff:
 TO RUN SCRIPT ON QGIS:
 ```exec(open(PathToScript.encode('utf-8')).read())```
-- Note: all paths will depend on your system, you would need to make some directories to follow my exact work path 
+- Note: all paths will depend on your system, you would need to make some directories to follow my exact work path
 
 - ```QgsProject.instance().clear()```
   - Clears all layers that have been load on

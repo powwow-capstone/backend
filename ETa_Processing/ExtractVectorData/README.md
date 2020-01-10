@@ -1,7 +1,7 @@
-### Getting Vector data from Crop Census dataset
-- See TestGDAL on Richard's Branch to see how this works...
+# Python script to extract polygons from a vector shape file
+- Results are placed in a psql table
 
-
+ 
 ## To run:
 - NOTE: A psql table needs to be set up before this script is run
   - The INSERT command needs to be updated too, specifically the ```cur.execute``` function
