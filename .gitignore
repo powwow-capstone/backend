@@ -6,11 +6,11 @@ package-lock.json
 plots/
 data/
 *~
-prod_server/venv
-prod_server/__pycache__
-prod_server/migrations/__pycache__
-prod_server/migrations/versions/__pycache__
-prod_server/models/__pycache__
+backend/venv
+backend/__pycache__
+backend/migrations/__pycache__
+backend/migrations/versions/__pycache__
+backend/models/__pycache__
 venv/
 *.bak
 *.pyc
