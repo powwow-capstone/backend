@@ -1,4 +1,4 @@
-#Getting features(polygons) from ds2677.gdb that intersect with given raster files
+# Getting features(polygons) from ds2677.gdb that intersect with given raster files
 
 ## Documentation and stuff...
 - Crop2014 census has some errors that only show up when specific processes are run
