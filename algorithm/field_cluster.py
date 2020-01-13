@@ -1,6 +1,8 @@
 import numpy as np
+import sys
 from scipy.stats import norm
 from sklearn.cluster import KMeans
+from sklearn.metrics import calinski_harabasz_score
 
 '''
 create a dictionary with key representing crop name and value being a list of lists [id,x,y,mean_eta] 
@@ -34,35 +36,35 @@ Right now, I'm hard coding the number of clusters by looking at the plots
 For the crop that I haven't analyzed yet, number of clusters is 2
 TODO: come up with some math to see how SSE changes and pick the k
 '''
-def createnclusters():
-    nclusters = dict()
-    nclusters["Grapes"] = 4
-    nclusters["Citrus"] = 3
-    nclusters["Idle"] = 2
-    nclusters["Tomatoes"] = 4
-    nclusters["Pistachios"] = 2
-    nclusters["Almonds"] = 2
-    nclusters["Wheat"] = 2
-    nclusters["Cherries"] = 2
-    nclusters["Cotton"] = 2
-    nclusters["Flowers, Nursery and Christmas Tree Farms"] = 5
-    nclusters["Miscellaneous Deciduous"] = 3
-    nclusters["Alfalfa and Alfalfa Mixtures"] = 7
-    nclusters["Onions and Garlic"] = 3
-    nclusters["Miscellaneous Truck Crops"] = 4
-    nclusters["Miscellaneous Grain and Hay"] = 3
-    nclusters["Bush Berries"] = 3
-    nclusters["Walnuts"] = 5
-    nclusters["Carrots"] = 2
-    nclusters["Corn, Sorghum and Sudan"] = 2
-    nclusters["Urban"] = 2
-    nclusters["Young Perennials"] = 2
-    nclusters["Pomegranates"] = 2
-    nclusters["Kiwis"] = 1
-    nclusters["Melons, Squash and Cucumbers"] = 3
-    nclusters["Peppers"] = 2
-    nclusters["Cole Crops"] = 1
-    return nclusters
+# def createnclusters():
+#     nclusters = dict()
+#     nclusters["Grapes"] = 4
+#     nclusters["Citrus"] = 3
+#     nclusters["Idle"] = 2
+#     nclusters["Tomatoes"] = 4
+#     nclusters["Pistachios"] = 2
+#     nclusters["Almonds"] = 2
+#     nclusters["Wheat"] = 2
+#     nclusters["Cherries"] = 2
+#     nclusters["Cotton"] = 2
+#     nclusters["Flowers, Nursery and Christmas Tree Farms"] = 5
+#     nclusters["Miscellaneous Deciduous"] = 3
+#     nclusters["Alfalfa and Alfalfa Mixtures"] = 7
+#     nclusters["Onions and Garlic"] = 3
+#     nclusters["Miscellaneous Truck Crops"] = 4
+#     nclusters["Miscellaneous Grain and Hay"] = 3
+#     nclusters["Bush Berries"] = 3
+#     nclusters["Walnuts"] = 5
+#     nclusters["Carrots"] = 2
+#     nclusters["Corn, Sorghum and Sudan"] = 2
+#     nclusters["Urban"] = 2
+#     nclusters["Young Perennials"] = 2
+#     nclusters["Pomegranates"] = 2
+#     nclusters["Kiwis"] = 1
+#     nclusters["Melons, Squash and Cucumbers"] = 3
+#     nclusters["Peppers"] = 2
+#     nclusters["Cole Crops"] = 1
+#     return nclusters
 
 '''
 Given list of labels returned from kmeans and the list of [id, x,y,eta]
@@ -102,19 +104,34 @@ def clustering(crop_xy_dict, nclusters):
     return field_efficiency
 
 '''
+use calinski_harabasz score to pick the best k for each crop
+'''
+def pick_best_k_ch(crops, crop):
+    xyeta = crops[crop]
+    vec = np.zeros(shape=(len(xyeta),2))
+    for i, v in enumerate(xyeta):
+        vec[i] = v[:2]
+    max_score = -sys.maxsize -1
+    best_k = 1
+    for k in range(2, 10):
+        if len(xyeta) <= k:
+            break
+        kmeans = KMeans(n_clusters=k).fit(vec)
+        score = calinski_harabasz_score(vec, kmeans.labels_)
+        if score > max_score:
+            max_score = score
+            best_k = k
+    return best_k
+
+'''
 Run the clustring algorithm and set the efficiency
 '''
 def alg(allFields):
     crop_xy_dict = create_crop_xy_dict(allFields) 
-    nclusters = createnclusters()
+    nclusters = dict()
     for f in allFields:
-        if f.crop not in nclusters:
-            nclusters[f.crop] = 2
+        nclusters[f.crop] = pick_best_k_ch(crop_xy_dict, f.crop)
     result = clustering(crop_xy_dict, nclusters)
     for field in allFields:
         field.set_efficiency(result[field.id])
 
-
-# def alg_stub(allFields):
-#     for field in allFields:
-#         field.set_efficiency(1)
