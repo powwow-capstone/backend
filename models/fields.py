@@ -20,7 +20,7 @@ class Field(db.Model):
     def __repr__(self):
         return '<id {}>'.format(self.id)
 
-    def get_centroid(self):
+    def set_centroid(self):
         lat_centroid = 0
         lng_centroid = 0
         num_datapoints = len(self.coordinates.get("coordinates"))
@@ -30,9 +30,13 @@ class Field(db.Model):
                 lng_centroid += point["lng"]
             except TypeError:
                 print("lat lng TYPE ERROR!")
+                self.centroid = (0,0)
         lat_centroid = lat_centroid / num_datapoints
         lng_centroid = lng_centroid / num_datapoints
-        return (lat_centroid, lng_centroid)
+        self.centroid = (lat_centroid, lng_centroid)
+
+    def get_centroid(self):
+        return self.centroid
 
     def set_efficiency(self, score):
         self.efficiency = score
@@ -43,5 +47,6 @@ class Field(db.Model):
             'crop': self.crop,
             'acres': self.acres,
             'coordinates': self.coordinates,
-            'efficiency': self.efficiency
+            'efficiency': self.efficiency,
+            'centroid': self.centroid
         }

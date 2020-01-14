@@ -21,30 +21,12 @@ from field_cluster import *
 def hello():
     return "Hello Cruel World!"
 
-# @app.route("/weather")
-# def get_all_weather_data():
-#     try:
-#         allWeather=Weather.query.all()
-#         return  jsonify([e.serialize() for e in allWeather])
-#     except Exception as e:
-# 	    return(str(e))
-
-# @app.route("/weather/<id_>")
-# def get_weather_by_id(id_):
-#     try:
-#         weather=Weather.query.filter_by(id=id_).first()
-#         return jsonify(weather.serialize())
-#     except Exception as e:
-# 	    return(str(e))
-
-# @app.route("/weather/form")
-# def get_weather_by_id_form():
-#     return render_template("coolfrontpage.html", weathers=Weather.query.all())
-
 @app.route("/api/fields")
 def get_all_field_data():
     try:
         allFields = Field.query.all()
+        for e in allFields:
+            e.set_centroid()
         alg(allFields)
         return jsonify([e.serialize() for e in allFields])
     except Exception as e:
