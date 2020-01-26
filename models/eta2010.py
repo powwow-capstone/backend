@@ -17,18 +17,18 @@ class ETa2010(db.Model):
     _median = db.Column(db.Float)
 
     def __init__(self, date, dayofyear, objectid, crop2014, acres, county, shape_leng, shape_area, _count, _sum, _mean, _median):
-        self.date = [date]
-        self.dayofyear = [dayofyear]
-        self.objectid = [objectid]
-        self.crop2014 = [crop2014]
-        self.acres = [acres]
-        self.county = [county]
-        self.shape_leng = [shape_leng]
-        self.shape_area = [shape_area]
-        self._count = [_count]
-        self._sum = [_sum]
-        self._mean = [_mean]
-        self._median = [_median]
+        self.date = date
+        self.dayofyear = dayofyear
+        self.objectid = objectid
+        self.crop2014 = crop2014
+        self.acres = acres
+        self.county = county
+        self.shape_leng = shape_leng
+        self.shape_area = shape_area
+        self._count = _count
+        self._sum = _sum
+        self._mean = _mean
+        self._median = _median
 
     def __repr__(self):
         return '<id {}>'.format(self.id)
