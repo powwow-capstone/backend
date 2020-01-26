@@ -69,6 +69,21 @@ def get_ETa_data_by_year(year_):
     except Exception as e:
         return (str(e))
 
+@app.route("/api/eta/2010_temp")
+def get_field():
+    try:
+        yearlyETadata = ETa2010.query.all()
+        return jsonify([e.serialize() for e in yearlyETadata])
+    except Exception as e:
+        return (str(e))
+
+@app.route("/api/eta/2010_temp/<day_>")
+def get_eta_by_day_of_year(day_):
+    try:
+        yearlyETadata = ETa2010.query.filter_by(dayofyear=day_).first()
+        return jsonify([e.serialize() for e in yearlyETadata])
+    except Exception as e:
+        return (str(e))
 
 if __name__ == '__main__':
     app.run()
