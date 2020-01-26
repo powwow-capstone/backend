@@ -42,13 +42,13 @@ def get_all_field_data():
     except Exception as e:
         return (str(e))
 
-@app.route("/api/fields/<id_>")
-def get_field_by_id(id_):
-    try:
-        field = Field.query.filter_by(id=id_).first()
-        return jsonify(field.serialize())
-    except Exception as e:
-	    return(str(e))
+# @app.route("/api/fields/<id_>")
+# def get_field_by_id(id_):
+#     try:
+#         field = Field.query.filter_by(id=id_).first()
+#         return jsonify(field.serialize())
+#     except Exception as e:
+# 	    return(str(e))
 
 @app.route("/api/eta/<year_>")
 def get_ETa_data_by_year(year_):
