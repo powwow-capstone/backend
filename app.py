@@ -50,9 +50,11 @@ def get_all_field_data():
 #     except Exception as e:
 # 	    return(str(e))
 
-@app.route("/api/eta/<year_>/<day_>")
-def get_ETa_data_by_year(year_, day_):
+@app.route("/api/eta")
+def get_ETa_data_by_year_and_day():
     try:
+        year_ = request.args.get('year', 2010)
+        day_ = request.args.get('day', 1)
         switcher = { 
             2010: ETa2010.query.filter_by(dayofyear=day_).all(), 
             2011: ETa2011.query.filter_by(dayofyear=day_).all(), 
