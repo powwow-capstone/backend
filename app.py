@@ -50,40 +50,40 @@ def get_all_field_data():
 #     except Exception as e:
 # 	    return(str(e))
 
-@app.route("/api/eta/<year_>")
-def get_ETa_data_by_year(year_):
+@app.route("/api/eta/<year_>/<day_>")
+def get_ETa_data_by_year(year_, day_):
     try:
         switcher = { 
-            2010: ETa2010.query.all(), 
-            2011: ETa2011.query.all(), 
-            2012: ETa2012.query.all(),  
-            2013: ETa2013.query.all(), 
-            2014: ETa2014.query.all(),
-            2015: ETa2015.query.all(),
-            2016: ETa2016.query.all(),
-            2017: ETa2017.query.all(),
-            2018: ETa2018.query.all(),
+            2010: ETa2010.query.filter_by(dayofyear=day_).all(), 
+            2011: ETa2011.query.filter_by(dayofyear=day_).all(), 
+            2012: ETa2012.query.filter_by(dayofyear=day_).all(),  
+            2013: ETa2013.query.filter_by(dayofyear=day_).all(), 
+            2014: ETa2014.query.filter_by(dayofyear=day_).all(),
+            2015: ETa2015.query.filter_by(dayofyear=day_).all(),
+            2016: ETa2016.query.filter_by(dayofyear=day_).all(),
+            2017: ETa2017.query.filter_by(dayofyear=day_).all(),
+            2018: ETa2018.query.filter_by(dayofyear=day_).all(),
         } 
         yearlyETadata = switcher.get(year_, "Error: No records for specified year.")
         return jsonify([e.serialize() for e in yearlyETadata])
     except Exception as e:
         return (str(e))
 
-@app.route("/api/eta/2010_temp")
-def get_field():
-    try:
-        yearlyETadata = ETa2010.query.all()
-        return jsonify([e.serialize() for e in yearlyETadata])
-    except Exception as e:
-        return (str(e))
+# @app.route("/api/eta/2010_temp")
+# def get_field():
+#     try:
+#         yearlyETadata = ETa2010.query.all()
+#         return jsonify([e.serialize() for e in yearlyETadata])
+#     except Exception as e:
+#         return (str(e))
 
-@app.route("/api/eta/2010_temp/<day_>")
-def get_eta_by_day_of_year(day_):
-    try:
-        yearlyETadata = ETa2010.query.filter_by(dayofyear=day_).all()
-        return jsonify([e.serialize() for e in yearlyETadata])
-    except Exception as e:
-        return (str(e))
+# @app.route("/api/eta/2010_temp/<day_>")
+# def get_eta_by_day_of_year(day_):
+#     try:
+#         yearlyETadata = ETa2010.query.filter_by(dayofyear=day_).all()
+#         return jsonify([e.serialize() for e in yearlyETadata])
+#     except Exception as e:
+#         return (str(e))
 
 if __name__ == '__main__':
     app.run()
