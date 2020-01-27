@@ -52,19 +52,20 @@ def get_all_field_data():
 
 @app.route("/api/eta")
 def get_ETa_data_by_year_and_day():
+    # nasty code lol
     try:
-        year_ = request.args.get('year', 2010)
-        day_ = request.args.get('day', 1)
+        year_ = request.args.get('year', '2010')
+        day_ = request.args.get('day', '1')
         switcher = { 
-            2010: ETa2010.query.filter_by(dayofyear=day_).all(), 
-            2011: ETa2011.query.filter_by(dayofyear=day_).all(), 
-            2012: ETa2012.query.filter_by(dayofyear=day_).all(),  
-            2013: ETa2013.query.filter_by(dayofyear=day_).all(), 
-            2014: ETa2014.query.filter_by(dayofyear=day_).all(),
-            2015: ETa2015.query.filter_by(dayofyear=day_).all(),
-            2016: ETa2016.query.filter_by(dayofyear=day_).all(),
-            2017: ETa2017.query.filter_by(dayofyear=day_).all(),
-            2018: ETa2018.query.filter_by(dayofyear=day_).all(),
+            '2010': ETa2010.query.filter_by(dayofyear=day_).all(), 
+            '2011': ETa2011.query.filter_by(dayofyear=day_).all(), 
+            '2012': ETa2012.query.filter_by(dayofyear=day_).all(),  
+            '2013': ETa2013.query.filter_by(dayofyear=day_).all(), 
+            '2014': ETa2014.query.filter_by(dayofyear=day_).all(),
+            '2015': ETa2015.query.filter_by(dayofyear=day_).all(),
+            '2016': ETa2016.query.filter_by(dayofyear=day_).all(),
+            '2017': ETa2017.query.filter_by(dayofyear=day_).all(),
+            '2018': ETa2018.query.filter_by(dayofyear=day_).all(),
         } 
         yearlyETadata = switcher.get(year_, "Error: No records for specified year.")
         return jsonify([e.serialize() for e in yearlyETadata])
