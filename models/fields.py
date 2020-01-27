@@ -42,6 +42,7 @@ class Field(db.Model):
         self.efficiency = score
 
     def serialize(self):
+        
         return {
             'id': self.id,
             'crop': self.crop,
