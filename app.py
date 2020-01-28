@@ -45,7 +45,7 @@ def get_all_field_data():
 @app.route("/api/eta")
 def get_ETa_data_by_year_and_day():
     try:
-        objectid_ = request.args.get('objectid', '54321')
+        objectid_ = request.args.get('objectid')
 
         yearlyETadata = ETa.query.filter_by(objectid=objectid_).all()
         return jsonify([e.serialize() for e in yearlyETadata])
