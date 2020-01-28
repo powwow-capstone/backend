@@ -47,7 +47,7 @@ def get_ETa_data_by_year_and_day():
     try:
         objectid_ = request.args.get('objectid')
 
-        yearlyETadata = ETa.query.filter_by(objectid=objectid_).order_by(date).all()
+        yearlyETadata = ETa.query.filter_by(objectid=objectid_).order_by(ETa.date).all()
         return jsonify([e.serialize() for e in yearlyETadata])
     except Exception as e:
         return (str(e))
