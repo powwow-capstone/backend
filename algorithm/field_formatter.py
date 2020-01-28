@@ -1,5 +1,4 @@
-from outlier import *
-
+from outlier import find_outlier
 
 def field_formatter(data_list):
     '''
@@ -45,7 +44,7 @@ def field_formatter(data_list):
         efficiency = data["efficiency"]
         scores.append((data_id, efficiency))
 
-    outliers = find_outliers(scores)
+    outliers = find_outlier(scores)
     outliers_dict = {}
     for outlier_percentile in outliers:
         outliers_dict[outlier_percentile[0]] = outlier_percentile[1]
@@ -72,7 +71,7 @@ def field_formatter(data_list):
                 "id" : data_id,
                 "centroid" : centroid,
                 "coordinates" : coordinates,
-                "categories" : cateogires,
+                "categories": categories,
                 "features" : features
             }
         )

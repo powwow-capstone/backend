@@ -17,6 +17,7 @@ sys.path.append('models')
 sys.path.append('algorithm')
 from fields import *
 from field_cluster import *
+from outlier import *
 from field_formatter import *
 from eta2010 import *
 from eta2011 import *
@@ -38,7 +39,8 @@ def get_all_field_data():
         allFields = Field.query.all()
         for e in allFields:
             e.set_centroid()
-        alg(allFields)
+            e.set_mean()
+        # alg(allFields)
 
         return jsonify(field_formatter([e.serialize() for e in allFields]))
     except Exception as e:

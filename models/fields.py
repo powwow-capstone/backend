@@ -48,6 +48,6 @@ class Field(db.Model):
             'crop': self.crop,
             'acres': self.acres,
             'coordinates': self.coordinates,
-            'efficiency': self.efficiency,
+            'efficiency': self.mean,
             'centroid': self.centroid
         }
