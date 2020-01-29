@@ -55,16 +55,16 @@ def field_formatter(data_list):
         centroid = data["centroid"]
         coordinates = data["coordinates"]
         categories = [{
-            "name" : "Acreage", 
+            "category_name" : "Acreage", 
             "type" : "real", 
             "value" : data["acres"]
         },
         {
-            "name": "Crop", 
+            "category_name": "Crop",
             "type": "string", 
             "value": data["crop"]
         }]
-        features = { "name" : "Efficiency", "value" : data["efficiency"], "percentile" : outliers_dict[data_id] }
+        features = [{ "name" : "Efficiency", "value" : data["efficiency"], "percentile" : outliers_dict[data_id] }]
 
         formatted_data.append(
             {
