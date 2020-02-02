@@ -17,7 +17,6 @@ sys.path.append('models')
 sys.path.append('algorithm')
 from fields import *
 from field_cluster import *
-from outlier import *
 from field_formatter import *
 from eta2010 import *
 from eta2011 import *
@@ -40,8 +39,8 @@ def get_all_field_data():
         for e in allFields:
             e.set_centroid()
             e.set_mean()
-        # alg(allFields)
-
+        
+        print("About to format")
         return jsonify(field_formatter([e.serialize() for e in allFields]))
     except Exception as e:
         return (str(e))
@@ -73,6 +72,37 @@ def get_ETa_data_by_year_and_day():
         } 
         yearlyETadata = switcher.get(year_, "Error: No records for specified year.")
         return jsonify([e.serialize() for e in yearlyETadata])
+    except Exception as e:
+        return (str(e))
+
+
+@app.route('/api/filter_fields', methods=['POST'])
+def get_filtered_field_data():
+    data = request.json
+    # print(type(data))
+    try:
+        allFields = Field.query.all()
+        filtered_fields = {}
+        for e in allFields:
+            e.set_centroid()
+            e.set_mean()
+            if e.get_id() in data:
+                # Group each field by crop
+                # This is hardcoded and not generic
+                crop = str(e.get_crop())
+                if crop not in filtered_fields:
+                    filtered_fields[crop] = []
+                # print("Add")
+                filtered_fields[crop].append(e.serialize())
+
+        result = []
+        for crop in filtered_fields:
+            result.extend(field_formatter(filtered_fields[crop]))
+        
+        print("Result")
+        print(jsonify(result))
+        return jsonify(result)
+        # return jsonify(field_formatter([e.serialize() for e in allFields]))
     except Exception as e:
         return (str(e))
 

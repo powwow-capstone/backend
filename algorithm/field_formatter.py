@@ -1,6 +1,7 @@
-from outlier import find_outlier
+from percentile import find_percentile_helper
 
 def field_formatter(data_list):
+    print("Field formatter")
     '''
         Format the field data into a format that the frontend can parse
         The frontend expects the following format:
@@ -8,7 +9,7 @@ def field_formatter(data_list):
             id: 1,
             features : [
                 {
-                    name : "efficiency", value : 0, percentile : 0
+                    name : "eta", value : 0, percentile : 0
                 },
                 ...
             ],
@@ -41,13 +42,10 @@ def field_formatter(data_list):
     scores = []
     for data in data_list:
         data_id = data["id"]
-        efficiency = data["efficiency"]
+        efficiency = data["eta"]
         scores.append((data_id, efficiency))
 
-    outliers = find_outlier(scores)
-    outliers_dict = {}
-    for outlier_percentile in outliers:
-        outliers_dict[outlier_percentile[0]] = outlier_percentile[1]
+    percentiles = find_percentile_helper(scores)
 
     formatted_data = []
     for data in data_list:
@@ -64,7 +62,7 @@ def field_formatter(data_list):
             "type": "string", 
             "value": data["crop"]
         }]
-        features = [{ "name" : "Efficiency", "value" : data["efficiency"], "percentile" : outliers_dict[data_id] }]
+        features = [{ "name" : "ETa", "value" : data["eta"], "percentile" : percentiles[data_id] }]
 
         formatted_data.append(
             {
