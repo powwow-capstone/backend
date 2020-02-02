@@ -112,9 +112,4 @@ def alg(allFields):
             nclusters[f.crop] = 2
     result = clustering(crop_xy_dict, nclusters)
     for field in allFields:
-        field.set_efficiency(result[field.id])
-
-
-# def alg_stub(allFields):
-#     for field in allFields:
-#         field.set_efficiency(1)
+        field.set_score(result[field.id])

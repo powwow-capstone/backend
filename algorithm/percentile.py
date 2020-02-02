@@ -11,7 +11,6 @@ def find_percentile_helper(fields):
 
     for field in fields:
         fields_features.append(field[1])
-        # results.append([field[0], None])
     fields_percentiles = stats.rankdata(fields_features, 'min')/len(fields_features)
 
     for index, field in enumerate(fields):

@@ -9,7 +9,7 @@ def field_formatter(data_list):
             id: 1,
             features : [
                 {
-                    name : "eta", value : 0, percentile : 0
+                    name : "eta", value : 0, score : 0
                 },
                 ...
             ],
@@ -39,13 +39,11 @@ def field_formatter(data_list):
     '''
     
     # First, calculate the percentile for all the efficiency scores
-    scores = []
-    for data in data_list:
-        data_id = data["id"]
-        efficiency = data["eta"]
-        scores.append((data_id, efficiency))
-
-    percentiles = find_percentile_helper(scores)
+    # scores = []
+    # for data in data_list:
+    #     data_id = data["id"]
+    #     efficiency = data["eta"]
+    #     scores.append((data_id, efficiency))
 
     formatted_data = []
     for data in data_list:
@@ -62,7 +60,7 @@ def field_formatter(data_list):
             "type": "string", 
             "value": data["crop"]
         }]
-        features = [{ "name" : "ETa", "value" : data["eta"], "percentile" : percentiles[data_id] }]
+        features = [{ "name" : "ETa", "value" : data["eta"], "score" : data["score"] }]
 
         formatted_data.append(
             {

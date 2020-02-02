@@ -44,8 +44,8 @@ class Field(db.Model):
     def get_crop(self):
         return self.crop
 
-    def set_eta(self, score):
-        self.eta = score
+    def set_score(self, score):
+        self.score = score
 
     def serialize(self):
         
@@ -54,6 +54,7 @@ class Field(db.Model):
             'crop': self.crop,
             'acres': self.acres,
             'coordinates': self.coordinates,
-            'eta': self.mean,
+            'eta' : self.mean,
+            'score': self.score,
             'centroid': self.centroid
         }
