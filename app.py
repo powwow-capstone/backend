@@ -62,18 +62,7 @@ def get_filtered_field_data():
     # print(type(data))
     try:
         allFields = Field.query.all()
-        # filtered_fields = {}
-        # for e in allFields:
-        #     e.set_centroid()
-        #     e.set_mean()
-        #     if e.get_id() in data:
-        #         # Group each field by crop
-        #         # This is hardcoded and not generic
-        #         crop = str(e.get_crop())
-        #         if crop not in filtered_fields:
-        #             filtered_fields[crop] = []
-        #         # print("Add")
-        #         filtered_fields[crop].append(e.serialize())
+       
         filtered_fields = []
         for e in allFields:
             e.set_centroid()
@@ -83,16 +72,7 @@ def get_filtered_field_data():
         
         alg(filtered_fields)
         return jsonify(field_formatter([e.serialize() for e in filtered_fields]))
-        # print(filtered_fields[0])
-        # result = []
-        # for crop in filtered_fields:
-        #     result.extend(field_formatter(filtered_fields))
         
-
-        # print("Result")
-        # print(jsonify(result))
-        # return jsonify(result)
-        # return jsonify(field_formatter([e.serialize() for e in allFields]))
     except Exception as e:
         return (str(e))
 
