@@ -17,6 +17,7 @@ sys.path.append('models')
 sys.path.append('algorithm')
 from fields import *
 from field_cluster import *
+from field_formatter import *
 from eta import *
 
 @app.route("/")
@@ -29,8 +30,11 @@ def get_all_field_data():
         allFields = Field.query.all()
         for e in allFields:
             e.set_centroid()
+            e.set_mean()
+            
         alg(allFields)
-        return jsonify([e.serialize() for e in allFields])
+        print("About to format")
+        return jsonify(field_formatter([e.serialize() for e in allFields]))
     except Exception as e:
         return (str(e))
 
@@ -51,6 +55,42 @@ def get_ETa_data_by_year_and_day():
         return jsonify([e.serialize() for e in yearlyETadata])
     except Exception as e:
         return (str(e))
+
+@app.route('/api/filter_fields', methods=['POST'])
+def get_filtered_field_data():
+    data = request.json
+    # print(type(data))
+    try:
+        allFields = Field.query.all()
+       
+        filtered_fields = []
+        for e in allFields:
+            e.set_centroid()
+            e.set_mean()
+            if e.get_id() in data:
+                filtered_fields.append(e)
+        
+        alg(filtered_fields)
+        return jsonify(field_formatter([e.serialize() for e in filtered_fields]))
+        
+    except Exception as e:
+        return (str(e))
+
+# @app.route("/api/eta/2010_temp")
+# def get_field():
+#     try:
+#         yearlyETadata = ETa2010.query.all()
+#         return jsonify([e.serialize() for e in yearlyETadata])
+#     except Exception as e:
+#         return (str(e))
+
+# @app.route("/api/eta/2010_temp/<day_>")
+# def get_eta_by_day_of_year(day_):
+#     try:
+#         yearlyETadata = ETa2010.query.filter_by(dayofyear=day_).all()
+#         return jsonify([e.serialize() for e in yearlyETadata])
+#     except Exception as e:
+#         return (str(e))
 
 if __name__ == '__main__':
     app.run()

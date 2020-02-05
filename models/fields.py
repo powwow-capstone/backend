@@ -37,16 +37,24 @@ class Field(db.Model):
 
     def get_centroid(self):
         return self.centroid
+    
+    def get_id(self):
+        return self.id
+    
+    def get_crop(self):
+        return self.crop
 
-    def set_efficiency(self, score):
-        self.efficiency = score
+    def set_score(self, score):
+        self.score = score
 
     def serialize(self):
+        
         return {
             'id': self.id,
             'crop': self.crop,
             'acres': self.acres,
             'coordinates': self.coordinates,
-            'efficiency': self.efficiency,
+            'eta' : self.mean,
+            'score': self.score,
             'centroid': self.centroid
         }
