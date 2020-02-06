@@ -2,23 +2,16 @@ import os
 import sys
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS, cross_origin
-from flask_sqlalchemy import SQLAlchemy, Model
-from flask_sqlalchemy_caching import CachingQuery
-from flask_caching import Cache
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-app.config['CACHE_TYPE'] = 'simple'
 
 # TODO: Remove the CORS line before submitting final version!
 CORS(app)
 
 app.config.from_object(os.environ['APP_SETTINGS'])
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-Model.query_class = CachingQuery
-db = SQLAlchemy(session_options={'query_cls': CachingQuery})
-
-cache = Cache(app)
+db = SQLAlchemy(app)
 
 sys.path.append('models')
 sys.path.append('algorithm')
@@ -34,14 +27,13 @@ def hello():
 @app.route("/api/fields")
 def get_all_field_data():
     try:
-        allFields = Field.query.options(FromCache(cache)).all()
+        allFields = Field.query.all()
         for e in allFields:
             e.set_centroid()
             e.set_mean()
             
         alg(allFields)
         print("About to format")
-        
         return jsonify(field_formatter([e.serialize() for e in allFields]))
     except Exception as e:
         return (str(e))
@@ -59,7 +51,7 @@ def get_ETa_data_by_year_and_day():
     try:
         objectid_ = request.args.get('objectid')
 
-        yearlyETadata = ETa.query.filter_by(objectid=objectid_).order_by(ETa.date).options(FromCache(cache)).all()
+        yearlyETadata = ETa.query.filter_by(objectid=objectid_).order_by(ETa.date).all()
         return jsonify([e.serialize() for e in yearlyETadata])
     except Exception as e:
         return (str(e))
@@ -70,7 +62,18 @@ def get_filtered_field_data():
     # print(type(data))
     try:
         allFields = Field.query.all()
-       
+        # filtered_fields = {}
+        # for e in allFields:
+        #     e.set_centroid()
+        #     e.set_mean()
+        #     if e.get_id() in data:
+        #         # Group each field by crop
+        #         # This is hardcoded and not generic
+        #         crop = str(e.get_crop())
+        #         if crop not in filtered_fields:
+        #             filtered_fields[crop] = []
+        #         # print("Add")
+        #         filtered_fields[crop].append(e.serialize())
         filtered_fields = []
         for e in allFields:
             e.set_centroid()
@@ -80,7 +83,16 @@ def get_filtered_field_data():
         
         alg(filtered_fields)
         return jsonify(field_formatter([e.serialize() for e in filtered_fields]))
+        # print(filtered_fields[0])
+        # result = []
+        # for crop in filtered_fields:
+        #     result.extend(field_formatter(filtered_fields))
         
+
+        # print("Result")
+        # print(jsonify(result))
+        # return jsonify(result)
+        # return jsonify(field_formatter([e.serialize() for e in allFields]))
     except Exception as e:
         return (str(e))
 
