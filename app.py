@@ -2,16 +2,23 @@ import os
 import sys
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS, cross_origin
-from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy, Model
+from flask_sqlalchemy_caching import CachingQuery
+from flask_caching import Cache
 
 app = Flask(__name__)
+app.config['CACHE_TYPE'] = 'simple'
 
 # TODO: Remove the CORS line before submitting final version!
 CORS(app)
 
 app.config.from_object(os.environ['APP_SETTINGS'])
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
+
+Model.query_class = CachingQuery
+db = SQLAlchemy(session_options={'query_cls': CachingQuery})
+
+cache = Cache(app)
 
 sys.path.append('models')
 sys.path.append('algorithm')
@@ -27,13 +34,14 @@ def hello():
 @app.route("/api/fields")
 def get_all_field_data():
     try:
-        allFields = Field.query.all()
+        allFields = Field.query.options(FromCache(cache)).all()
         for e in allFields:
             e.set_centroid()
             e.set_mean()
             
         alg(allFields)
         print("About to format")
+        
         return jsonify(field_formatter([e.serialize() for e in allFields]))
     except Exception as e:
         return (str(e))
@@ -51,7 +59,7 @@ def get_ETa_data_by_year_and_day():
     try:
         objectid_ = request.args.get('objectid')
 
-        yearlyETadata = ETa.query.filter_by(objectid=objectid_).order_by(ETa.date).all()
+        yearlyETadata = ETa.query.filter_by(objectid=objectid_).order_by(ETa.date).options(FromCache(cache)).all()
         return jsonify([e.serialize() for e in yearlyETadata])
     except Exception as e:
         return (str(e))
