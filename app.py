@@ -3,7 +3,7 @@ import sys
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS, cross_origin
 from flask_sqlalchemy import SQLAlchemy, Model
-from flask_sqlalchemy_caching import CachingQuery
+from flask_sqlalchemy_caching import CachingQuery, FromCache
 from flask_caching import Cache
 
 app = Flask(__name__)
