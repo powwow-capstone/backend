@@ -17,7 +17,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 Model.query_class = CachingQuery
 db = SQLAlchemy(session_options={'query_cls': CachingQuery})
-db.init_app(app)
 
 cache = Cache(app)
 
