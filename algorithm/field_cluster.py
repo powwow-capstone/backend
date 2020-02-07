@@ -1,6 +1,8 @@
 import numpy as np
+import sys
 from scipy.stats import norm
 from sklearn.cluster import KMeans
+from sklearn.metrics import calinski_harabasz_score
 
 '''
 create a dictionary with key representing crop name and value being a list of lists [id,x,y,mean_eta] 
