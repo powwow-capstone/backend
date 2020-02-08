@@ -42,11 +42,11 @@ def field_query_helper(time_range):
         start_month = 1
         end_month = 12
         if time_range["month"] != None:
-            start_month = time_range["month"]
-            end_month = time_range["month"]
+            start_month = int(time_range["month"])
+            end_month = int(time_range["month"])
 
-        start = date(year=time_range["year"], month=start_month, day=1)
-        end = date(year=time_range["year"], month=end_month,
+        start = date(year=int(time_range["year"]), month=start_month, day=1)
+        end = date(year=int(time_range["year"]), month=end_month,
                    day=get_days_in_month(end_month))
 
         eta_means = dict(ETa.query.with_entities(ETa.objectid, func.avg(ETa._mean)).filter(
