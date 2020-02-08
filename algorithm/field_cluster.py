@@ -11,7 +11,6 @@ def create_crop_xy_dict(allFields):
     crops = {}
     for f in allFields:
         centroid = f.get_centroid()
-        f.set_mean()    #### STUB #####
         if f.crop not in crops:
             crops[f.crop] = []
         crops[f.crop].append([f.id, centroid[0], centroid[1], f.mean])
