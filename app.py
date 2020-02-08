@@ -67,13 +67,16 @@ def field_query_helper(time_range):
         return []
 
 
-@app.route("/api/fields", methods=['POST'])
-# @app.route("/api/fields")
+@app.route("/api/fields")
 def get_all_field_data():
-    print("get_all_field_data")
-    data = request.json
-    # print(data)
-    # data = { "month" : None, "year" : 2014 }  #stubs
+    month = request.args.get('month')
+    print(month)
+    if month == "null":
+        month = None
+    year = request.args.get('year')
+    data = { "month" : month, "year" : year } 
+
+    print(data);
 
     allFields = field_query_helper(data)
 
@@ -98,7 +101,6 @@ def get_filtered_field_data():
     params = request.json
     data = params["data"]
     time_range = { "month" : params["month"], "year" : params["year"] }
-    # print(type(data))
     try:
         allFields = field_query_helper(time_range)
 
