@@ -42,7 +42,7 @@ def field_query_helper(time_range):
 
     try:
         allFields = Field.query.all()
-
+        
         start_month = 1
         end_month = 12
         if time_range["month"] != None:
@@ -65,7 +65,13 @@ def field_query_helper(time_range):
                 e.set_mean(0)
         
         return allFields
-        
+
+            e.set_mean()
+            
+        alg(allFields)
+        print("About to format")
+        return jsonify(field_formatter([e.serialize() for e in allFields]))
+
     except Exception as e:
         print(str(e))
         return []
