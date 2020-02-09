@@ -4,25 +4,21 @@ import time
 from datetime import date
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS, cross_origin
-from flask_sqlalchemy import SQLAlchemy, Model
-from flask_caching import Cache
 from flask_sqlalchemy import SQLAlchemy
+from flask_caching import Cache
 from sqlalchemy.sql import func
 
 app = Flask(__name__)
-app.config['CACHE_TYPE'] = 'simple'
 
 # TODO: Remove the CORS line before submitting final version!
 CORS(app)
 
 app.config.from_object(os.environ['APP_SETTINGS'])
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['CACHE_TYPE'] = 'simple'
+app.cache = Cache(app)
 
-Model.query_class = CachingQuery
-db = SQLAlchemy(session_options={'query_cls': CachingQuery})
-db.init_app(app)
-
-cache = Cache(app)
+db = SQLAlchemy(app)
 
 sys.path.append('models')
 sys.path.append('algorithm')
@@ -76,6 +72,7 @@ def field_query_helper(time_range):
 
 
 @app.route("/api/fields")
+@app.cache.cached(timeout=300)
 def get_all_field_data():
     month = request.args.get('month')
     print(month)
@@ -91,8 +88,8 @@ def get_all_field_data():
     alg(allFields)
     return jsonify(field_formatter([e.serialize() for e in allFields]))
 
-
 @app.route("/api/eta")
+@app.cache.cached(timeout=120)
 def get_ETa_data_by_year_and_day():
     try:
         objectid_ = request.args.get('objectid')
@@ -105,6 +102,7 @@ def get_ETa_data_by_year_and_day():
 
 
 @app.route('/api/filter_fields', methods=['POST'])
+@app.cache.cached(timeout=120)
 def get_filtered_field_data():
     params = request.json
     data = params["data"]
