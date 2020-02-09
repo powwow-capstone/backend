@@ -4,14 +4,10 @@ import time
 from datetime import date
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS, cross_origin
-<<<<<<< HEAD
 from flask_sqlalchemy import SQLAlchemy, Model
-from flask_sqlalchemy_caching import CachingQuery, FromCache
 from flask_caching import Cache
-=======
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import func
->>>>>>> master
 
 app = Flask(__name__)
 app.config['CACHE_TYPE'] = 'simple'
