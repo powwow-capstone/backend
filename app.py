@@ -65,7 +65,7 @@ def field_query_helper(time_range):
         
         return allFields
 
-            e.set_mean()
+        e.set_mean()
             
         alg(allFields)
         print("About to format")
