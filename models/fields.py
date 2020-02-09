@@ -13,9 +13,11 @@ class Field(db.Model):
         self.acres = acres
         self.coordinates = coordinates
 
-    def set_mean(self):
+    def set_mean(self, mean = None):
         #stub
-        self.mean = random.random()*10
+        if mean == None:
+            mean = random.random()*10
+        self.mean = mean
 
     def __repr__(self):
         return '<id {}>'.format(self.id)

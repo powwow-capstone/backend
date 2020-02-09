@@ -1,8 +1,12 @@
 import os
 import sys
+import time
+from datetime import date
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS, cross_origin
 from flask_sqlalchemy import SQLAlchemy
+from flask_caching import Cache
+from sqlalchemy.sql import func
 
 app = Flask(__name__)
 
@@ -11,109 +15,118 @@ CORS(app)
 
 app.config.from_object(os.environ['APP_SETTINGS'])
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['CACHE_TYPE'] = 'simple'
+app.cache = Cache(app)
+
 db = SQLAlchemy(app)
 
 sys.path.append('models')
 sys.path.append('algorithm')
-from fields import *
-from field_cluster import *
-from field_formatter import *
 from eta import *
+from field_formatter import *
+from field_cluster import *
+from fields import *
+from db_helper import *
 
 @app.route("/")
 def hello():
     return "Hello Cruel World!"
 
-@app.route("/api/fields")
-def get_all_field_data():
+def field_query_helper(time_range):
+    # Query the Field table and calculate each field's centroid and mean ETa
+    # The mean ETa is determined by the time range, which is a dictionary of the
+    # following format:
+    # {  "month" : val1,  "year" : val2 }
+    # If "month" is None, then get a yearly ETa average for each field
+    # else get a monthly ETa average
+
     try:
         allFields = Field.query.all()
+        
+        start_month = 1
+        end_month = 12
+        if time_range["month"] != None:
+            start_month = int(time_range["month"])
+            end_month = int(time_range["month"])
+
+        start = date(year=int(time_range["year"]), month=start_month, day=1)
+        end = date(year=int(time_range["year"]), month=end_month,
+                   day=get_days_in_month(end_month))
+
+        eta_means = dict(ETa.query.with_entities(ETa.objectid, func.avg(ETa._mean)).filter(
+            ETa.date <= end).filter(ETa.date >= start).group_by(ETa.objectid).all())
+
         for e in allFields:
+
             e.set_centroid()
+            if eta_means.get(e.get_id()) != None:
+                e.set_mean(eta_means.get(e.get_id()))
+            else:
+                e.set_mean(0)
+        
+        return allFields
+
             e.set_mean()
             
         alg(allFields)
         print("About to format")
         return jsonify(field_formatter([e.serialize() for e in allFields]))
-    except Exception as e:
-        return (str(e))
 
-# @app.route("/api/fields/<id_>")
-# def get_field_by_id(id_):
-#     try:
-#         field = Field.query.filter_by(id=id_).first()
-#         return jsonify(field.serialize())
-#     except Exception as e:
-# 	    return(str(e))
+    except Exception as e:
+        print(str(e))
+        return []
+
+
+@app.route("/api/fields")
+@app.cache.cached(timeout=300)
+def get_all_field_data():
+    month = request.args.get('month')
+    print(month)
+    if month == "null":
+        month = None
+    year = request.args.get('year')
+    data = { "month" : month, "year" : year } 
+
+    print(data);
+
+    allFields = field_query_helper(data)
+
+    alg(allFields)
+    return jsonify(field_formatter([e.serialize() for e in allFields]))
 
 @app.route("/api/eta")
+@app.cache.cached(timeout=120)
 def get_ETa_data_by_year_and_day():
     try:
         objectid_ = request.args.get('objectid')
 
-        yearlyETadata = ETa.query.filter_by(objectid=objectid_).order_by(ETa.date).all()
+        yearlyETadata = ETa.query.filter_by(
+            objectid=objectid_).order_by(ETa.date).all()
         return jsonify([e.serialize() for e in yearlyETadata])
     except Exception as e:
         return (str(e))
 
+
 @app.route('/api/filter_fields', methods=['POST'])
+@app.cache.cached(timeout=120)
 def get_filtered_field_data():
-    data = request.json
-    # print(type(data))
+    params = request.json
+    data = params["data"]
+    time_range = { "month" : params["month"], "year" : params["year"] }
     try:
-        allFields = Field.query.all()
-        # filtered_fields = {}
-        # for e in allFields:
-        #     e.set_centroid()
-        #     e.set_mean()
-        #     if e.get_id() in data:
-        #         # Group each field by crop
-        #         # This is hardcoded and not generic
-        #         crop = str(e.get_crop())
-        #         if crop not in filtered_fields:
-        #             filtered_fields[crop] = []
-        #         # print("Add")
-        #         filtered_fields[crop].append(e.serialize())
+        allFields = field_query_helper(time_range)
+
         filtered_fields = []
         for e in allFields:
-            e.set_centroid()
-            e.set_mean()
             if e.get_id() in data:
                 filtered_fields.append(e)
-        
+
         alg(filtered_fields)
         return jsonify(field_formatter([e.serialize() for e in filtered_fields]))
-        # print(filtered_fields[0])
-        # result = []
-        # for crop in filtered_fields:
-        #     result.extend(field_formatter(filtered_fields))
-        
 
-        # print("Result")
-        # print(jsonify(result))
-        # return jsonify(result)
-        # return jsonify(field_formatter([e.serialize() for e in allFields]))
     except Exception as e:
         return (str(e))
 
-# @app.route("/api/eta/2010_temp")
-# def get_field():
-#     try:
-#         yearlyETadata = ETa2010.query.all()
-#         return jsonify([e.serialize() for e in yearlyETadata])
-#     except Exception as e:
-#         return (str(e))
-
-# @app.route("/api/eta/2010_temp/<day_>")
-# def get_eta_by_day_of_year(day_):
-#     try:
-#         yearlyETadata = ETa2010.query.filter_by(dayofyear=day_).all()
-#         return jsonify([e.serialize() for e in yearlyETadata])
-#     except Exception as e:
-#         return (str(e))
 
 if __name__ == '__main__':
     app.run()
-
-
-
