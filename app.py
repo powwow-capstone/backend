@@ -2,7 +2,7 @@ import os
 import sys
 import time
 from datetime import date
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, abort
 from flask_cors import CORS, cross_origin
 from flask_sqlalchemy import SQLAlchemy
 # from flask_caching import Cache
@@ -55,13 +55,17 @@ def field_query_helper(time_range):
         eta_means = dict(ETa.query.with_entities(ETa.objectid, func.avg(ETa._mean)).filter(
             ETa.date <= end).filter(ETa.date >= start).group_by(ETa.objectid).all())
 
+        if len(eta_means) == 0:
+            # No data fits this time range
+            return []
+
         for e in allFields:
 
             e.set_centroid()
             if eta_means.get(e.get_id()) != None:
                 e.set_mean(eta_means.get(e.get_id()))
             else:
-                e.set_mean(0)
+                e.set_mean(-1)
         
         return allFields
         
@@ -83,9 +87,16 @@ def get_all_field_data():
     print(data);
 
     allFields = field_query_helper(data)
+    print("len allfields:", len(allFields))
+    if len(allFields) > 0:
 
-    alg(allFields)
-    return jsonify(field_formatter([e.serialize() for e in allFields]))
+        alg(allFields)
+        return jsonify(field_formatter([e.serialize() for e in allFields]))
+    else:
+        print("send 404")
+        # No data fits within this time range
+        # Return 404
+        return {}, 404
 
 @app.route("/api/eta")
 # @app.cache.cached(timeout=120)
@@ -109,13 +120,21 @@ def get_filtered_field_data():
     try:
         allFields = field_query_helper(time_range)
 
-        filtered_fields = []
-        for e in allFields:
-            if e.get_id() in data:
-                filtered_fields.append(e)
+        if len(allFields) > 0:
 
-        alg(filtered_fields)
-        return jsonify(field_formatter([e.serialize() for e in filtered_fields]))
+            filtered_fields = []
+            for e in allFields:
+                if e.get_id() in data:
+                    filtered_fields.append(e)
+
+            alg(filtered_fields)
+            return jsonify(field_formatter([e.serialize() for e in filtered_fields]))
+        
+        else:
+            print("send 404")
+            # No data fits within this time range
+            # Return 404
+            return {}, 404
 
     except Exception as e:
         return (str(e))
