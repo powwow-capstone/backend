@@ -78,22 +78,17 @@ def field_query_helper(time_range):
 # @app.cache.cached(timeout=300)
 def get_all_field_data():
     month = request.args.get('month')
-    print(month)
     if month == "null":
         month = None
     year = request.args.get('year')
     data = { "month" : month, "year" : year } 
 
-    print(data);
-
     allFields = field_query_helper(data)
-    print("len allfields:", len(allFields))
     if len(allFields) > 0:
 
         alg(allFields)
         return jsonify(field_formatter([e.serialize() for e in allFields]))
     else:
-        print("send 404")
         # No data fits within this time range
         # Return 404
         return {}, 404
@@ -131,7 +126,6 @@ def get_filtered_field_data():
             return jsonify(field_formatter([e.serialize() for e in filtered_fields]))
         
         else:
-            print("send 404")
             # No data fits within this time range
             # Return 404
             return {}, 404
