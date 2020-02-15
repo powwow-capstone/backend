@@ -10,10 +10,12 @@ create a dictionary with key representing crop name and value being a list of li
 def create_crop_xy_dict(allFields):
     crops = {}
     for f in allFields:
-        centroid = f.get_centroid()
-        if f.crop not in crops:
-            crops[f.crop] = []
-        crops[f.crop].append([f.id, centroid[0], centroid[1], f.mean])
+        if f.mean >= 0:
+
+            centroid = f.get_centroid()
+            if f.crop not in crops:
+                crops[f.crop] = []
+            crops[f.crop].append([f.id, centroid[0], centroid[1], f.mean])
     return crops
 
 '''
@@ -143,4 +145,7 @@ def alg(allFields):
     #     nclusters[f.crop] = pick_best_k_ch(crop_xy_dict, f.crop)
     result = clustering(crop_xy_dict, nclusters)
     for field in allFields:
-        field.set_score(result[field.id])
+        if field.id in result:
+            field.set_score(result[field.id])
+        else:
+            field.set_score(-1)
