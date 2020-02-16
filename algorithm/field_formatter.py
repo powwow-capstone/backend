@@ -1,12 +1,12 @@
 from percentile import find_percentile_helper
 
 def field_formatter(data_list):
-    print("Field formatter")
     '''
         Format the field data into a format that the frontend can parse
         The frontend expects the following format:
         {
             id: 1,
+            group_id: 0,
             features : [
                 {
                     name : "eta", value : 0, score : 0
@@ -48,6 +48,7 @@ def field_formatter(data_list):
     formatted_data = []
     for data in data_list:
         data_id = data["id"]
+        group_id = data["group_id"]
         centroid = data["centroid"]
         coordinates = data["coordinates"]
         categories = [{
@@ -65,6 +66,7 @@ def field_formatter(data_list):
         formatted_data.append(
             {
                 "id" : data_id,
+                "groupid" : group_id,
                 "centroid" : centroid,
                 "coordinates" : coordinates,
                 "categories": categories,
