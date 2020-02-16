@@ -1,7 +1,6 @@
 from percentile import find_percentile_helper
 
 def field_formatter(data_list):
-    print("Field formatter")
     '''
         Format the field data into a format that the frontend can parse
         The frontend expects the following format:
