@@ -51,7 +51,7 @@ class Field(db.Model):
 
     def set_group_id(self, group_id):
         # A group_id is the which group this field belongs to that was used to calculate its efficiency score
-        self.group_id = group_id
+        self.group_id = str(group_id)
 
     def serialize(self):
         

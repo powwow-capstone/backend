@@ -89,7 +89,7 @@ def get_all_field_data():
     allFields = field_query_helper(data)
     if len(allFields) > 0:
 
-        alg(allFields)
+        alg(allFields)        
         return jsonify(field_formatter([e.serialize() for e in allFields]))
     else:
         # No data fits within this time range
