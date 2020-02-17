@@ -1,12 +1,13 @@
 import os
 import sys
 import time
+import statistics
 from datetime import date
 from flask import Flask, request, jsonify, render_template, abort
 from flask_cors import CORS, cross_origin
 from flask_sqlalchemy import SQLAlchemy
 # from flask_caching import Cache
-from sqlalchemy.sql import func
+from sqlalchemy.sql import table, column, select, func
 
 app = Flask(__name__)
 
@@ -74,6 +75,36 @@ def field_query_helper(time_range):
         return []
 
 
+def eta_stats_helper(eta_data, cohort_ids):
+    # objectid_ is the field to collect data for
+    # cohort_ids is a list of field ids within the cohort of that fields
+    # For each day within eta_data, retrieve the mean and standard deviation of eta for the cohort on each day
+    cohort_means = {}
+    for e in eta_data:
+        mean = e._mean
+        date = e.date
+        if date not in cohort_means:
+            cohort_means[date] = []
+        
+        # if objectid in cohort_ids:
+        #     cohort_means[date].append(mean)
+        
+        cohort_means[date].append(mean)
+        
+
+    cohort_stats = []
+    for date in cohort_means:
+        daily_stat = {}
+        if len(cohort_means[date]) > 1:
+            daily_stat = {  "date" : date, "mean" : statistics.mean(cohort_means[date]), "stdev" : statistics.stdev(cohort_means[date]) }
+        else:
+            daily_stat = {"date": date, "mean": cohort_means[date][0], "stdev": 0 }
+
+        cohort_stats.append(daily_stat)
+
+    
+    return cohort_stats
+
 @app.route("/api/fields")
 # @app.cache.cached(timeout=300)
 def get_all_field_data():
@@ -101,10 +132,32 @@ def get_all_field_data():
 def get_ETa_data_by_year_and_day():
     try:
         objectid_ = request.args.get('objectid')
+        # cohortids_ = request.args.getlist('cid')
+        cohortids_ = set(request.args.getlist('cid') )
 
-        yearlyETadata = ETa.query.filter_by(
+        start_month = request.args.get('start_month')
+        end_month = request.args.get('end_month')
+        if start_month == "null" or end_month == "null":
+            start_month = 1
+            end_month = 12
+        start_year = request.args.get('start_year')
+        end_year = request.args.get('end_year')
+
+        start = date(year=int(start_year), month=start_month, day=1)
+        end = date(year=int(end_year), month=end_month,
+                   day=get_days_in_month(end_month))
+        
+        cohortETadata = ETa.query.filter(ETa.objectid.in_(cohortids_)).with_entities(ETa.date,
+            func.avg(ETa._mean), func.stddev(ETa._mean)).group_by(ETa.date).order_by(ETa.date).all()
+    
+
+        yearlyETadata = ETa.query.with_entities(ETa.date, ETa._mean).filter_by(
             objectid=objectid_).order_by(ETa.date).all()
-        return jsonify([e.serialize() for e in yearlyETadata])
+
+        # cohortETadata = eta_stats_helper(cohortETadata, cohortids_)
+
+        # return jsonify({"field_stats": [e.serialize() for e in yearlyETadata], "cohort_stats": [{"date": e[0], "mean": e[1], "stdev": e[2]} for e in cohortETadata]})
+        return jsonify({"field_stats": [{ "date" : e[0], "_mean" : e[1] } for e in yearlyETadata], "cohort_stats": [{"date": e[0], "mean": e[1], "stdev": e[2]} for e in cohortETadata]})
     except Exception as e:
         return (str(e))
 
