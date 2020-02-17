@@ -125,18 +125,18 @@ def get_ETa_data_by_year_and_day():
 
         # Parse date range of query
         # At the moment, this is not being used
-        
-        # start_month = request.args.get('start_month')
-        # end_month = request.args.get('end_month')
-        # if start_month == "null" or end_month == "null":
-        #     start_month = 1
-        #     end_month = 12
-        # start_year = request.args.get('start_year')
-        # end_year = request.args.get('end_year')
 
-        # start = date(year=int(start_year), month=start_month, day=1)
-        # end = date(year=int(end_year), month=end_month,
-        #            day=get_days_in_month(end_month))
+        start_month = request.args.get('start_month')
+        end_month = request.args.get('end_month')
+        if start_month == "null" or end_month == "null":
+            start_month = 1
+            end_month = 12
+        start_year = request.args.get('start_year')
+        end_year = request.args.get('end_year')
+
+        start = date(year=int(start_year), month=start_month, day=1)
+        end = date(year=int(end_year), month=end_month,
+                   day=get_days_in_month(end_month))
 
         manager = multiprocessing.Manager()
         results = manager.dict()
