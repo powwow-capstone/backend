@@ -2,6 +2,8 @@ import os
 import sys
 import time
 import statistics
+import json
+import multiprocessing
 from datetime import date
 from flask import Flask, request, jsonify, render_template, abort
 from flask_cors import CORS, cross_origin
@@ -75,6 +77,8 @@ def field_query_helper(time_range):
         return []
 
 
+
+
 @app.route("/api/fields")
 # @app.cache.cached(timeout=300)
 def get_all_field_data():
@@ -97,6 +101,19 @@ def get_all_field_data():
         # Return 404
         return {}, 404
 
+
+def cohortETaQuery(results, cohortids_):
+    cohortETadata = ETa.query.filter(ETa.objectid.in_(cohortids_)).with_entities(ETa.date,
+            func.avg(ETa._mean), func.stddev(ETa._mean)).group_by(ETa.date).order_by(ETa.date).all()
+    
+    results["cohort_stats"] = [{"date": e[0], "mean": e[1], "stdev": e[2]} for e in cohortETadata]
+
+def individualETaQuery(results, objectid_):
+    yearlyETadata = ETa.query.with_entities(ETa.date, ETa._mean).filter_by(
+         objectid=objectid_).order_by(ETa.date).all()
+    
+    results["field_stats"] = [{ "date" : e[0], "_mean" : e[1] } for e in yearlyETadata]
+
 @app.route("/api/eta")
 # @app.cache.cached(timeout=120)
 def get_ETa_data_by_year_and_day():
@@ -108,27 +125,38 @@ def get_ETa_data_by_year_and_day():
 
         # Parse date range of query
         # At the moment, this is not being used
-        start_month = request.args.get('start_month')
-        end_month = request.args.get('end_month')
-        if start_month == "null" or end_month == "null":
-            start_month = 1
-            end_month = 12
-        start_year = request.args.get('start_year')
-        end_year = request.args.get('end_year')
-
-        start = date(year=int(start_year), month=start_month, day=1)
-        end = date(year=int(end_year), month=end_month,
-                   day=get_days_in_month(end_month))
         
-        cohortETadata = ETa.query.filter(ETa.objectid.in_(cohortids_)).with_entities(ETa.date,
-            func.avg(ETa._mean), func.stddev(ETa._mean)).group_by(ETa.date).order_by(ETa.date).all()
+        # start_month = request.args.get('start_month')
+        # end_month = request.args.get('end_month')
+        # if start_month == "null" or end_month == "null":
+        #     start_month = 1
+        #     end_month = 12
+        # start_year = request.args.get('start_year')
+        # end_year = request.args.get('end_year')
+
+        # start = date(year=int(start_year), month=start_month, day=1)
+        # end = date(year=int(end_year), month=end_month,
+        #            day=get_days_in_month(end_month))
+
+        manager = multiprocessing.Manager()
+        results = manager.dict()
+        p1 = multiprocessing.Process(target=cohortETaQuery, args=(results, cohortids_,))
+        p2 = multiprocessing.Process(target=individualETaQuery, args=(results, objectid_,))
+        p1.start()
+        p2.start()
+
+        p1.join()
+        p2.join()
+
+        # cohortETadata = ETa.query.filter(ETa.objectid.in_(cohortids_)).with_entities(ETa.date,
+        #     func.avg(ETa._mean), func.stddev(ETa._mean)).group_by(ETa.date).order_by(ETa.date).all()
     
 
-        yearlyETadata = ETa.query.with_entities(ETa.date, ETa._mean).filter_by(
-            objectid=objectid_).order_by(ETa.date).all()
+        # yearlyETadata = ETa.query.with_entities(ETa.date, ETa._mean).filter_by(
+        #     objectid=objectid_).order_by(ETa.date).all()
 
-    
-        return jsonify({"field_stats": [{ "date" : e[0], "_mean" : e[1] } for e in yearlyETadata], "cohort_stats": [{"date": e[0], "mean": e[1], "stdev": e[2]} for e in cohortETadata]})
+        return jsonify(results._getvalue())
+        # return jsonify({"field_stats": [{"date": e[0], "_mean": e[1]} for e in yearlyETadata], "cohort_stats": [{"date": e[0], "mean": e[1], "stdev": e[2]} for e in cohortETadata]})
     except Exception as e:
         return (str(e))
 
