@@ -75,36 +75,6 @@ def field_query_helper(time_range):
         return []
 
 
-def eta_stats_helper(eta_data, cohort_ids):
-    # objectid_ is the field to collect data for
-    # cohort_ids is a list of field ids within the cohort of that fields
-    # For each day within eta_data, retrieve the mean and standard deviation of eta for the cohort on each day
-    cohort_means = {}
-    for e in eta_data:
-        mean = e._mean
-        date = e.date
-        if date not in cohort_means:
-            cohort_means[date] = []
-        
-        # if objectid in cohort_ids:
-        #     cohort_means[date].append(mean)
-        
-        cohort_means[date].append(mean)
-        
-
-    cohort_stats = []
-    for date in cohort_means:
-        daily_stat = {}
-        if len(cohort_means[date]) > 1:
-            daily_stat = {  "date" : date, "mean" : statistics.mean(cohort_means[date]), "stdev" : statistics.stdev(cohort_means[date]) }
-        else:
-            daily_stat = {"date": date, "mean": cohort_means[date][0], "stdev": 0 }
-
-        cohort_stats.append(daily_stat)
-
-    
-    return cohort_stats
-
 @app.route("/api/fields")
 # @app.cache.cached(timeout=300)
 def get_all_field_data():
@@ -135,6 +105,9 @@ def get_ETa_data_by_year_and_day():
         # cohortids_ = request.args.getlist('cid')
         cohortids_ = set(request.args.getlist('cid') )
 
+
+        # Parse date range of query
+        # At the moment, this is not being used
         start_month = request.args.get('start_month')
         end_month = request.args.get('end_month')
         if start_month == "null" or end_month == "null":
@@ -154,9 +127,7 @@ def get_ETa_data_by_year_and_day():
         yearlyETadata = ETa.query.with_entities(ETa.date, ETa._mean).filter_by(
             objectid=objectid_).order_by(ETa.date).all()
 
-        # cohortETadata = eta_stats_helper(cohortETadata, cohortids_)
-
-        # return jsonify({"field_stats": [e.serialize() for e in yearlyETadata], "cohort_stats": [{"date": e[0], "mean": e[1], "stdev": e[2]} for e in cohortETadata]})
+    
         return jsonify({"field_stats": [{ "date" : e[0], "_mean" : e[1] } for e in yearlyETadata], "cohort_stats": [{"date": e[0], "mean": e[1], "stdev": e[2]} for e in cohortETadata]})
     except Exception as e:
         return (str(e))
