@@ -119,21 +119,25 @@ def compute_cluster_stats(labels, xyeta):
 
 '''
 run the clustering all at once on all the crops with different k values
-return a dictionary, key is field id and value is 0 or 1 to indicate if the field's 
-water use is efficiency or not
+return two dictionaries.
+    - field_efficiency: key is field id and value is 0 or 1 to indicate if the field's 
+      water use is efficiency or not
+    - field_cluster_ids: key is field id and value is the cluster id it belongs to
 '''
 def clustering(crop_xy_dict, nclusters):
     field_efficiency = dict()
+    field_cluster_ids = dict()
     for crop, xy in crop_xy_dict.items():
         labels, xyetas = cluster_by_crop(crop_xy_dict, crop, nclusters[crop])
         cluster_stats = compute_cluster_stats(labels, xyetas)
         for i, label in enumerate(labels):
             id = xyetas[i][0]
+            field_cluster_ids[id] = label
             if xyetas[i][3] <= cluster_stats[label][0]-2*cluster_stats[label][1] or xyetas[i][3] >= cluster_stats[label][0]+2*cluster_stats[label][1]:
                 field_efficiency[id] = 0
             else:
                 field_efficiency[id] = 1
-    return field_efficiency
+    return field_efficiency, field_cluster_ids
 
 '''
 Run the clustring algorithm and set the efficiency
@@ -143,9 +147,16 @@ def alg(allFields):
     nclusters = createnclusters(crop_xy_dict)
     # for f in allFields:
     #     nclusters[f.crop] = pick_best_k_ch(crop_xy_dict, f.crop)
-    result = clustering(crop_xy_dict, nclusters)
+    scores, cluster_labels = clustering(crop_xy_dict, nclusters)
     for field in allFields:
-        if field.id in result:
-            field.set_score(result[field.id])
+        if field.id in scores:
+            field.set_score(scores[field.id])
         else:
             field.set_score(-1)
+        
+        if field.id in cluster_labels:
+            field.set_group_id(cluster_labels[field.id])
+        else:
+            field.set_group_id(-1)
+        
+        

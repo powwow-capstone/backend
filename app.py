@@ -44,15 +44,15 @@ def field_query_helper(time_range):
 
         start_month = 1
         end_month = 12
-        if time_range["month"] != None:
-            start_month = int(time_range["month"])
-            end_month = int(time_range["month"])
+        if time_range["start_month"] != None and time_range["end_month"] != None:
+            start_month = int(time_range["start_month"])
+            end_month = int(time_range["end_month"])
 
-        start = date(year=int(time_range["year"]), month=start_month, day=1)
-        end = date(year=int(time_range["year"]), month=end_month,
+        start = date(year=int(time_range["start_year"]), month=start_month, day=1)
+        end = date(year=int(time_range["end_year"]), month=end_month,
                    day=get_days_in_month(end_month))
 
-        eta_means = dict(ETa.query.with_entities(ETa.objectid, func.avg(ETa._mean)).filter(
+        eta_means = dict(ETa.query.with_entities(ETa.objectid, func.sum(ETa._mean)).filter(
             ETa.date <= end).filter(ETa.date >= start).group_by(ETa.objectid).all())
 
         if len(eta_means) == 0:
@@ -77,16 +77,19 @@ def field_query_helper(time_range):
 @app.route("/api/fields")
 # @app.cache.cached(timeout=300)
 def get_all_field_data():
-    month = request.args.get('month')
-    if month == "null":
-        month = None
-    year = request.args.get('year')
-    data = { "month" : month, "year" : year } 
+    start_month = request.args.get('start_month')
+    end_month = request.args.get('end_month')
+    if start_month == "null" or end_month == "null":
+        start_month = None
+        end_month = None
+    start_year = request.args.get('start_year')
+    end_year = request.args.get('end_year')
+    data = { "start_month" : start_month, "start_year" : start_year, "end_month" : end_month, "end_year" : end_year } 
 
     allFields = field_query_helper(data)
     if len(allFields) > 0:
 
-        alg(allFields)
+        alg(allFields)        
         return jsonify(field_formatter([e.serialize() for e in allFields]))
     else:
         # No data fits within this time range
@@ -111,7 +114,8 @@ def get_ETa_data_by_year_and_day():
 def get_filtered_field_data():
     params = request.json
     data = params["data"]
-    time_range = { "month" : params["month"], "year" : params["year"] }
+    time_range = {"start_month": params["start_month"], "start_year": params["start_year"],
+                  "end_month": params["end_month"], "end_year": params["end_year"]}
     try:
         allFields = field_query_helper(time_range)
 

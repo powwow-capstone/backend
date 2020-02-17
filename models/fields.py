@@ -49,10 +49,15 @@ class Field(db.Model):
     def set_score(self, score):
         self.score = score
 
+    def set_group_id(self, group_id):
+        # A group_id is the which group this field belongs to that was used to calculate its efficiency score
+        self.group_id = str(group_id)
+
     def serialize(self):
         
         return {
             'id': self.id,
+            'group_id': self.group_id,
             'crop': self.crop,
             'acres': self.acres,
             'coordinates': self.coordinates,
