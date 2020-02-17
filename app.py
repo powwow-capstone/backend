@@ -101,13 +101,14 @@ def get_all_field_data():
         # Return 404
         return {}, 404
 
-@app.route("/api/eta")
+
+@app.route("/api/eta", methods=['PUT'])
 # @app.cache.cached(timeout=120)
 def get_ETa_data_by_year_and_day():
     try:
+        cohortids_ = request.json
         objectid_ = request.args.get('objectid')
-        cohortids_ = request.args.getlist('cid')
-        # cohortids_ = set(request.args.getlist('cid') )
+        # cohortids_ = request.args.getlist('cid')
 
 
         # Parse date range of query
