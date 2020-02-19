@@ -118,28 +118,29 @@ def get_ETa_data_by_year_and_day():
 
 
         # Parse date range of query
-        # At the moment, this is not being used
 
-        # start_month = request.args.get('start_month')
-        # end_month = request.args.get('end_month')
-        # if start_month == "null" or end_month == "null":
-        #     start_month = 1
-        #     end_month = 12
-        # start_year = request.args.get('start_year')
-        # end_year = request.args.get('end_year')
+        start_month = request.args.get('start_month')
+        end_month = request.args.get('end_month')
+        if start_month == "null" or end_month == "null":
+            start_month = 1
+            end_month = 12
+        start_year = request.args.get('start_year')
+        end_year = request.args.get('end_year')
 
-        # start = date(year=int(start_year), month=start_month, day=1)
-        # end = date(year=int(end_year), month=end_month,
-        #            day=get_days_in_month(end_month))
+        start = date(year=int(start_year), month=int(start_month), day=1)
+        end = date(year=int(end_year), month=int(end_month),
+                   day=get_days_in_month(int(end_month)))
 
         results = {}
 
-        cohortETadata = ETa.query.filter(ETa.objectid.in_(cohortids_)).with_entities(ETa.date,
+        cohortETadata = ETa.query.filter(
+            ETa.date <= end).filter(ETa.date >= start).filter(ETa.objectid.in_(cohortids_)).with_entities(ETa.date,
             func.avg(ETa._mean), func.stddev(ETa._mean)).group_by(ETa.date).order_by(ETa.date).all()
     
         results["cohort_stats"] = [{"date": e[0], "_mean": e[1], "_stdev": e[2]} for e in cohortETadata]
 
-        yearlyETadata = ETa.query.with_entities(ETa.date, ETa._mean).filter_by(
+        yearlyETadata = ETa.query.filter(
+            ETa.date <= end).filter(ETa.date >= start).with_entities(ETa.date, ETa._mean).filter_by(
          objectid=objectid_).order_by(ETa.date).all()
     
         results["field_stats"] = [{ "date" : e[0], "_mean" : e[1] } for e in yearlyETadata]
