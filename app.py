@@ -78,7 +78,6 @@ def field_query_helper(time_range):
 
 
 
-
 @app.route("/api/fields")
 # @app.cache.cached(timeout=300)
 def get_all_field_data():
@@ -145,6 +144,13 @@ def get_ETa_data_by_year_and_day():
     except Exception as e:
         return (str(e))
 
+@app.route('/api/date_range')
+def get_min_max_date():
+    # Return the earliest and latest date for which ETa data exists
+    earliest_date = ETa.query.with_entities(func.min(ETa.date)).all()
+    latest_date = ETa.query.with_entities(func.max(ETa.date)).all()
+
+    return jsonify( {"min" : earliest_date, "max" : latest_date} )
 
 @app.route('/api/filter_fields', methods=['POST'])
 # @app.cache.cached(timeout=120)
