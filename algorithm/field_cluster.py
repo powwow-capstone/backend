@@ -1,3 +1,4 @@
+from scipy import stats
 import numpy as np
 import sys
 from scipy.stats import norm
@@ -67,13 +68,21 @@ TODO: come up with some math to see how SSE changes and pick the k
 #     nclusters["Cole Crops"] = 1
 #     return nclusters
 
-def createnclusters(crop_xy_dict):
+'''
+    If oneCluster is true, then each crop will only have one cluster
+    Else each crop will have two clusters if possible
+'''
+def createnclusters(crop_xy_dict, oneCluster = False):
+
     nclusters = dict()
     for crop, xyeta in crop_xy_dict.items():
-        if len(xyeta) < 2:
+        if oneCluster:
             nclusters[crop] = 1
         else:
-            nclusters[crop] = 2
+            if len(xyeta) < 2:
+                nclusters[crop] = 1
+            else:
+                nclusters[crop] = 2
     return nclusters
         
 '''
@@ -142,9 +151,10 @@ def clustering(crop_xy_dict, nclusters):
 '''
 Run the clustring algorithm and set the efficiency
 '''
-def alg(allFields):
+def alg(allFields, oneCluster = False):
+
     crop_xy_dict = create_crop_xy_dict(allFields) 
-    nclusters = createnclusters(crop_xy_dict)
+    nclusters = createnclusters(crop_xy_dict, oneCluster)
     # for f in allFields:
     #     nclusters[f.crop] = pick_best_k_ch(crop_xy_dict, f.crop)
     scores, cluster_labels = clustering(crop_xy_dict, nclusters)
@@ -159,4 +169,4 @@ def alg(allFields):
         else:
             field.set_group_id(-1)
         
-        
+
