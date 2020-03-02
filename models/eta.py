@@ -1,7 +1,7 @@
 from app import db
 
 class ETa(db.Model):
-    __tablename__ = 'eta2010_2018'
+    __tablename__ = 'eta2010_2018_weekly'
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.Date)
     dayofyear = db.Column(db.Integer)
