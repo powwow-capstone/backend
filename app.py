@@ -3,15 +3,19 @@ import sys
 import time
 import statistics
 import json
+import sqlparse
 import multiprocessing
 from datetime import date
 from flask import Flask, request, jsonify, render_template, abort
 from flask_cors import CORS, cross_origin
 from flask_sqlalchemy import SQLAlchemy
+from flask_compress import Compress
 # from flask_caching import Cache
 from sqlalchemy.sql import table, column, select, func
 
 app = Flask(__name__)
+compress = Compress()
+compress.init_app(app)
 
 # TODO: Remove the CORS line before submitting final version!
 CORS(app)
@@ -106,7 +110,6 @@ def get_all_field_data():
         # Return 404
         return {}, 404
 
-
 @app.route("/api/eta", methods=['PUT'])
 # @app.cache.cached(timeout=120)
 def get_ETa_data_by_year_and_day():
@@ -135,6 +138,12 @@ def get_ETa_data_by_year_and_day():
         cohortETadata = ETa.query.filter(
             ETa.date <= end).filter(ETa.date >= start).filter(ETa.objectid.in_(cohortids_)).with_entities(ETa.date,
             func.avg(ETa._mean), func.stddev(ETa._mean)).group_by(ETa.date).order_by(ETa.date).all()
+
+        print(ETa.query.filter(
+            ETa.date <= end).filter(ETa.date >= start).filter(ETa.objectid.in_(cohortids_)).with_entities(ETa.date,
+            func.avg(ETa._mean), func.stddev(ETa._mean)).group_by(ETa.date).order_by(ETa.date))
+        
+
     
         results["cohort_stats"] = [{"date": e[0], "_mean": e[1], "_stdev": e[2]} for e in cohortETadata]
 
