@@ -9,7 +9,7 @@ def field_formatter(data_list):
             group_id: 0,
             features : [
                 {
-                    name : "eta", value : 0, score : 0
+                    name : "eta", value : 0, score : 0, units : "inches"
                 },
                 ...
             ],
@@ -61,7 +61,7 @@ def field_formatter(data_list):
             "type": "string", 
             "value": data["crop"]
         }]
-        features = [{ "name" : "ETa", "value" : data["eta"], "score" : data["score"] }]
+        features = [{ "name" : "ETa", "value" : data["eta"], "score" : data["score"], "units" : "inches" }]
 
         formatted_data.append(
             {
