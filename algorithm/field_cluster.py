@@ -133,7 +133,7 @@ def clustering(crop_xy_dict, nclusters):
         for i, label in enumerate(labels):
             id = xyetas[i][0]
             field_cluster_ids[id] = label
-            if xyetas[i][3] <= cluster_stats[label][0]-2*cluster_stats[label][1] or xyetas[i][3] >= cluster_stats[label][0]+2*cluster_stats[label][1]:
+            if xyetas[i][3] < cluster_stats[label][0]-2*cluster_stats[label][1] or xyetas[i][3] > cluster_stats[label][0]+2*cluster_stats[label][1]:
                 field_efficiency[id] = 0
             else:
                 field_efficiency[id] = 1
